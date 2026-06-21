@@ -6,7 +6,7 @@
 <title>Seller Net Sheet — Mark Allen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#0E0F12;
@@ -181,39 +181,82 @@
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
 
-  /* SAVE AS PDF — html2pdf captures this light skin (works inside sandboxed iframes) */
+  /* ===== SAVE AS PDF (html2pdf) — Editorial document (P2) ===== */
   body.printing{
-    --bg:#ffffff; --panel:#ffffff; --panel-2:#F7F3EA;
-    --line:rgba(164,118,47,0.30); --line-soft:#EAE3D5;
+    --bg:#FBF8F2; --panel:#FBF8F2; --panel-2:#F3EDE1;
+    --line:rgba(164,118,47,0.30); --line-soft:#E7DFD1;
     --text:#211C15; --muted:#6E665A; --faint:#9A9488;
     --accent:#A4762F; --accent-soft:rgba(164,118,47,0.10); --bad:#B5462E;
-    background:#fff;
+    background:#FBF8F2;
   }
   body.printing .no-print{display:none!important;}
   body.printing .print-only{display:inline!important;}
+  body.printing .pzero{display:none!important;}
+  body.printing .wrap{padding:46px 42px 40px;max-width:none;}
+
+  body.printing .wm{letter-spacing:.14em;}
+  body.printing .title{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:26px;letter-spacing:-.01em;
+    border-top:1px solid var(--line-soft);padding-top:18px;margin-top:20px;}
+  body.printing .addr{border-bottom:none;padding:0;margin-top:6px;font-size:14px;color:var(--muted);}
+  body.printing .prepared{margin-top:4px;}
+
+  body.printing .hero{background:none;border:none;box-shadow:none;padding:0;margin:24px 0 0;border-radius:0;}
   body.printing .hero::after{display:none;}
-  body.printing .hero .net{text-shadow:none;}
+  body.printing .hero .net{text-shadow:none;font-size:50px;}
+  body.printing .hero .sub{font-size:12px;}
+
+  body.printing .sec{margin-top:24px;}
+  body.printing .sec-h{color:var(--faint);}
+  body.printing .card{background:none;border:none;border-radius:0;}
+  body.printing .row{padding:9px 2px;border-bottom:1px dotted rgba(164,118,47,0.40);}
+  body.printing .row:last-child{border-bottom:1px dotted rgba(164,118,47,0.40);}
+  body.printing .row .name{font-size:13.5px;}
+  body.printing .computed.cost{color:var(--text);}
+
+  body.printing .summary{background:none;border:none;border-radius:0;padding:0;margin-top:26px;}
+  body.printing .sline{border-bottom:1px dotted rgba(164,118,47,0.22);padding:9px 2px;}
+  body.printing .sline.total{border-top:1.5px solid var(--text);border-bottom:none;margin-top:6px;padding-top:13px;}
+  body.printing .sline.total .v{font-size:19px;}
+  body.printing .sline.pct{border-bottom:none;}
+
+  body.printing .credit{border-top:1px solid var(--line-soft);}
+
   body.printing .card,
   body.printing .hero,
   body.printing .summary,
   body.printing .cmp-col{break-inside:avoid;}
 
-  /* PRINT — flip to a clean light document for paper / PDF / forwarding */
+  /* PRINT (native) — same editorial document */
   @media print{
     @page{margin:0.5in;}
     :root{
-      --bg:#ffffff; --panel:#ffffff; --panel-2:#F7F3EA;
-      --line:rgba(164,118,47,0.30); --line-soft:#EAE3D5;
+      --bg:#FBF8F2; --panel:#FBF8F2; --panel-2:#F3EDE1;
+      --line:rgba(164,118,47,0.30); --line-soft:#E7DFD1;
       --text:#211C15; --muted:#6E665A; --faint:#9A9488;
       --accent:#A4762F; --accent-soft:rgba(164,118,47,0.10); --bad:#B5462E;
     }
-    body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    body{background:#FBF8F2;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .wrap{max-width:none;padding:0;}
     .no-print{display:none!important;}
     .print-only{display:inline!important;}
-    .hero{margin-top:16px;}
+    .pzero{display:none!important;}
+    .title{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;letter-spacing:-.01em;
+      border-top:1px solid var(--line-soft);padding-top:16px;margin-top:18px;}
+    .addr{border-bottom:none;padding:0;margin-top:6px;font-size:14px;color:var(--muted);}
+    .prepared{margin-top:4px;}
+    .hero{background:none;border:none;box-shadow:none;padding:0;margin:18px 0 0;border-radius:0;}
     .hero::after{display:none;}
     .hero .net{text-shadow:none;}
+    .sec-h{color:var(--faint);}
+    .card{background:none;border:none;border-radius:0;}
+    .row{padding:9px 2px;border-bottom:1px dotted rgba(164,118,47,0.40);}
+    .row:last-child{border-bottom:1px dotted rgba(164,118,47,0.40);}
+    .computed.cost{color:var(--text);}
+    .summary{background:none;border:none;border-radius:0;padding:0;margin-top:22px;}
+    .sline{border-bottom:1px dotted rgba(164,118,47,0.22);padding:9px 2px;}
+    .sline.total{border-top:1.5px solid var(--text);border-bottom:none;margin-top:6px;padding-top:13px;}
+    .sline.pct{border-bottom:none;}
+    .credit{border-top:1px solid var(--line-soft);}
     .cmp-col{break-inside:avoid;}
   }
 </style>
@@ -394,10 +437,10 @@ function App() {
     window.scrollTo(0, 0);
     const slug = addr.trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "");
     const opt = {
-      margin: 0.4,
+      margin: 0,
       filename: "Seller-Net-Sheet" + (slug ? "-" + slug : "") + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, backgroundColor: "#ffffff", useCORS: true, scrollY: 0 },
+      html2canvas: { scale: 2, backgroundColor: "#FBF8F2", useCORS: true, scrollY: 0 },
       jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
       pagebreak: { mode: ["avoid-all", "css"] },
     };
@@ -534,7 +577,7 @@ function App() {
             <div className="name">Loan payoff <small>1st mortgage balance</small></div>
             <MoneyInput value={payoff1} onChange={setPayoff1} />
           </div>
-          <div className="row">
+          <div className={"row" + (num(payoff2) > 0 ? "" : " pzero")}>
             <div className="name">Other payoff <small>2nd / HELOC / liens</small></div>
             <MoneyInput value={payoff2} onChange={setPayoff2} />
           </div>
@@ -561,19 +604,19 @@ function App() {
             <div className="name">Owner's title policy <small>estimate</small></div>
             <div className="computed cost">{usd0(m.title)}</div>
           </div>
-          <div className="row">
+          <div className={"row" + (num(warranty) > 0 ? "" : " pzero")}>
             <div className="name">Home warranty</div>
             <MoneyInput value={warranty} onChange={setWarranty} />
           </div>
-          <div className="row">
+          <div className={"row" + (num(concessions) > 0 ? "" : " pzero")}>
             <div className="name">Buyer credit / concessions</div>
             <MoneyInput value={concessions} onChange={setConcessions} />
           </div>
-          <div className="row">
+          <div className={"row" + (num(hoa) > 0 ? "" : " pzero")}>
             <div className="name">HOA transfer / demand</div>
             <MoneyInput value={hoa} onChange={setHoa} />
           </div>
-          <div className="row">
+          <div className={"row" + (num(misc) > 0 ? "" : " pzero")}>
             <div className="name">Repairs / misc</div>
             <MoneyInput value={misc} onChange={setMisc} />
           </div>
