@@ -166,6 +166,11 @@
   .link-box{margin-top:10px;width:100%;background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;
     color:var(--accent);font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:13px;outline:none;}
   .link-box:focus{border-color:var(--accent);}
+  .fub-in{flex:1;min-width:0;max-width:210px;margin-left:12px;text-align:left;background:var(--panel-2);
+    border:1px solid var(--line-soft);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;
+    font-size:14px;padding:8px 10px;outline:none;}
+  .fub-in:focus{border-color:var(--accent);}
+  .fub-in::placeholder{color:var(--faint);}
   .moveup-result{margin-top:4px;padding:16px;border-radius:12px;background:var(--accent-soft);border:1px solid var(--line);text-align:center;}
   .moveup-result .lab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;}
   .moveup-result .big{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;
@@ -283,6 +288,10 @@ const DEFAULTS = {
   rate:         "6.75",  // next-home interest rate % (editable)
 };
 
+// Zapier Catch Hook — an inbound endpoint, safe in client code (NOT a credential).
+// It relays the net sheet to Follow Up Boss; the FUB API key lives only inside Zapier.
+const FUB_WEBHOOK = "https://hooks.zapier.com/hooks/catch/28016326/42base4/";
+
 const num = (s) => {
   const n = parseFloat(String(s).replace(/[^0-9.]/g, ""));
   return isNaN(n) ? 0 : n;
@@ -379,6 +388,15 @@ function App() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showLink, setShowLink] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+
+  // send to Follow Up Boss (via Zapier)
+  const [sellerName, setSellerName] = useState(gp("sn", ""));
+  const [sellerPhone, setSellerPhone] = useState(gp("sph", ""));
+  const [sellerEmail, setSellerEmail] = useState(gp("sem", ""));
+  const [fubOpen, setFubOpen] = useState(false);
+  const [fubSending, setFubSending] = useState(false);
+  const [fubSent, setFubSent] = useState(false);
+  const [fubErr, setFubErr] = useState("");
 
   const payoffs = num(payoff1) + num(payoff2);
 
@@ -494,6 +512,38 @@ function App() {
     }
   };
 
+  const handleSendFub = () => {
+    if (fubSending) return;
+    setFubErr("");
+    if (!sellerName.trim() && !sellerEmail.trim() && !sellerPhone.trim()) {
+      setFubErr("Add a name, phone, or email so FUB can match the lead.");
+      return;
+    }
+    setFubSending(true);
+    const body = new URLSearchParams({
+      name: sellerName.trim(),
+      email: sellerEmail.trim(),
+      phone: sellerPhone.trim(),
+      address: addr.trim(),
+      subject: "Seller Net Sheet — " + (addr.trim() || "—"),
+      summary: buildSummary(),
+      sale_price: usd0(P),
+      net: usd0(m.net),
+      net_pct: fmtPct(netPct),
+      payoffs: usd0(payoffs),
+      costs: usd0(m.costs),
+      source: "Seller Net Sheet Tool",
+    });
+    fetch(FUB_WEBHOOK, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body: body.toString(),
+    })
+      .then(() => { setFubSent(true); setFubSending(false); setTimeout(() => setFubSent(false), 4000); })
+      .catch(() => { setFubErr("Couldn't reach Zapier — check your connection and try again."); setFubSending(false); });
+  };
+
   const copyText = (text, flash) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(flash).catch(() => {});
@@ -519,6 +569,7 @@ function App() {
     add("w", warranty, DEFAULTS.warranty); add("cc", concessions, ""); add("h", hoa, ""); add("mi", misc, "");
     add("tr", transferRate, DEFAULTS.transferRate); add("ek", escrowPerK, DEFAULTS.escrowPerK); add("tk", titlePerK, DEFAULTS.titlePerK);
     add("p2", price2, ""); add("dp", downPct, DEFAULTS.downPct); add("r", rate, DEFAULTS.rate);
+    add("sn", sellerName, ""); add("sph", sellerPhone, ""); add("sem", sellerEmail, "");
     const qs = q.toString();
     return base + (qs ? "?" + qs : "");
   };
@@ -539,6 +590,8 @@ function App() {
     setCompareOn(false); setPrice2(""); setShowRates(false);
     setMoveOn(false); setNextCash(""); setDownPct(DEFAULTS.downPct); setRate(DEFAULTS.rate);
     setShowLink(false); setShareUrl(""); setShowSummary(false);
+    setSellerName(""); setSellerPhone(""); setSellerEmail("");
+    setFubOpen(false); setFubSending(false); setFubSent(false); setFubErr("");
   };
 
   return (
@@ -727,6 +780,30 @@ function App() {
                 </div>
               </div>
               <div className="cmp-empty">P&amp;I only — excludes taxes, insurance, HOA, and mortgage insurance.</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* SEND TO FOLLOW UP BOSS */}
+      <div className="sec no-print">
+        <button className={"toggle" + (fubOpen ? " open" : "")} onClick={() => setFubOpen(!fubOpen)}>
+          <span className="chev">▸</span> Log to Follow Up Boss
+        </button>
+        {fubOpen && (
+          <div className="card" style={{ marginTop: 8 }}>
+            <div className="rates-body">
+              <div className="rline"><span>Seller name</span>
+                <input className="fub-in" value={sellerName} onChange={(e) => setSellerName(e.target.value)} placeholder="Jane Seller" /></div>
+              <div className="rline"><span>Phone</span>
+                <input className="fub-in" inputMode="tel" value={sellerPhone} onChange={(e) => setSellerPhone(e.target.value)} placeholder="661-555-0123" /></div>
+              <div className="rline"><span>Email</span>
+                <input className="fub-in" inputMode="email" value={sellerEmail} onChange={(e) => setSellerEmail(e.target.value)} placeholder="jane@email.com" /></div>
+              <button className="share-btn" onClick={handleSendFub} disabled={fubSending}>
+                {fubSending ? "Sending…" : fubSent ? "Logged to FUB ✓" : "Send to Follow Up Boss"}
+              </button>
+              {fubErr && <div className="cmp-empty" style={{ color: "var(--bad)" }}>{fubErr}</div>}
+              <div className="cmp-empty">Creates or updates the contact in FUB and attaches this net sheet as a note.</div>
             </div>
           </div>
         )}
