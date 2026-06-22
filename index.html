@@ -390,7 +390,8 @@ function App() {
   const [shareUrl, setShareUrl] = useState("");
 
   // send to Follow Up Boss (via Zapier)
-  const [sellerName, setSellerName] = useState(gp("sn", ""));
+  const [sellerFirst, setSellerFirst] = useState(gp("sf", ""));
+  const [sellerLast, setSellerLast] = useState(gp("sl", ""));
   const [sellerPhone, setSellerPhone] = useState(gp("sph", ""));
   const [sellerEmail, setSellerEmail] = useState(gp("sem", ""));
   const [fubOpen, setFubOpen] = useState(false);
@@ -515,17 +516,23 @@ function App() {
   const handleSendFub = () => {
     if (fubSending) return;
     setFubErr("");
-    if (!sellerName.trim() && !sellerEmail.trim() && !sellerPhone.trim()) {
+    const first = sellerFirst.trim();
+    const last = sellerLast.trim();
+    const fullName = (first + " " + last).trim();
+    if (!fullName && !sellerEmail.trim() && !sellerPhone.trim()) {
       setFubErr("Add a name, phone, or email so FUB can match the lead.");
       return;
     }
     setFubSending(true);
+    const subjLabel = addr.trim() || fullName;
     const body = new URLSearchParams({
-      name: sellerName.trim(),
+      name: fullName,
+      first_name: first,
+      last_name: last,
       email: sellerEmail.trim(),
       phone: sellerPhone.trim(),
       address: addr.trim(),
-      subject: "Seller Net Sheet — " + (addr.trim() || "—"),
+      subject: subjLabel ? "Seller Net Sheet — " + subjLabel : "Seller Net Sheet",
       summary: buildSummary(),
       sale_price: usd0(P),
       net: usd0(m.net),
@@ -569,7 +576,7 @@ function App() {
     add("w", warranty, DEFAULTS.warranty); add("cc", concessions, ""); add("h", hoa, ""); add("mi", misc, "");
     add("tr", transferRate, DEFAULTS.transferRate); add("ek", escrowPerK, DEFAULTS.escrowPerK); add("tk", titlePerK, DEFAULTS.titlePerK);
     add("p2", price2, ""); add("dp", downPct, DEFAULTS.downPct); add("r", rate, DEFAULTS.rate);
-    add("sn", sellerName, ""); add("sph", sellerPhone, ""); add("sem", sellerEmail, "");
+    add("sf", sellerFirst, ""); add("sl", sellerLast, ""); add("sph", sellerPhone, ""); add("sem", sellerEmail, "");
     const qs = q.toString();
     return base + (qs ? "?" + qs : "");
   };
@@ -590,7 +597,7 @@ function App() {
     setCompareOn(false); setPrice2(""); setShowRates(false);
     setMoveOn(false); setNextCash(""); setDownPct(DEFAULTS.downPct); setRate(DEFAULTS.rate);
     setShowLink(false); setShareUrl(""); setShowSummary(false);
-    setSellerName(""); setSellerPhone(""); setSellerEmail("");
+    setSellerFirst(""); setSellerLast(""); setSellerPhone(""); setSellerEmail("");
     setFubOpen(false); setFubSending(false); setFubSent(false); setFubErr("");
   };
 
@@ -793,8 +800,10 @@ function App() {
         {fubOpen && (
           <div className="card" style={{ marginTop: 8 }}>
             <div className="rates-body">
-              <div className="rline"><span>Seller name</span>
-                <input className="fub-in" value={sellerName} onChange={(e) => setSellerName(e.target.value)} placeholder="Jane Seller" /></div>
+              <div className="rline"><span>First name</span>
+                <input className="fub-in" value={sellerFirst} onChange={(e) => setSellerFirst(e.target.value)} placeholder="Jane" /></div>
+              <div className="rline"><span>Last name</span>
+                <input className="fub-in" value={sellerLast} onChange={(e) => setSellerLast(e.target.value)} placeholder="Seller" /></div>
               <div className="rline"><span>Phone</span>
                 <input className="fub-in" inputMode="tel" value={sellerPhone} onChange={(e) => setSellerPhone(e.target.value)} placeholder="661-555-0123" /></div>
               <div className="rline"><span>Email</span>
